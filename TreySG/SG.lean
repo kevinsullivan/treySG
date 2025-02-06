@@ -20,15 +20,20 @@ structure SceneGraph : Type 1 where
 (egoVehicle : Vehicle)
 (otherVehicles : Set Vechicle)
 (egoInvariant : egoVehicle ∉ otherVehicles)
-(vechicles : Set Vehicle := { egoVehicle} ∪ otherVehicles)
+(vehicles : Set Vehicle := { egoVehicle} ∪ otherVehicles)
 (stopSigns : Set StopSign)
 
 -- relations
 (ssControlsLane : StopSign → Lane → Bool)
 (vehInLane : Vehicle → Lane → Bool)
-(hasStop : Prop :=
-  let egoLanes := { l ∈ lanes | vehInLane egoVehicle l}
-  let lanesWithSS := { l ∈ lanes |  ∀ ss ∈ stopSigns, ssControlsLane ss l }
-  egoLanes ∩ lanesWithSS ≠ {})
+
+-- entities
+(lanesControledBySS : Set Lane := { l ∈ lanes |  ∀ ss ∈ stopSigns, ssControlsLane ss l })
+(vehicleLanes : Vehicle → Set Lane := λ v => { l ∈ lanes | ∀ veh ∈ vehicles, vehInLane veh l})
+(egoLanes : Set Lane := vehicleLanes egoVehicle)
+
+-- properties
+(vehHasStop (v : Vehicle) : Prop := ∃ l, l ∈ vehicleLanes v ∩ lanesControledBySS)
+(egoHasStop : Prop := vehHasStop egoVehicle)
 
 end TreySG.SG
