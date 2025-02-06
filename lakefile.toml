@@ -1,0 +1,13 @@
+name = "TreySG"
+version = "0.1.0"
+defaultTargets = ["treysg"]
+
+[[lean_lib]]
+name = "TreySG"
+
+[dependencies]
+mathlib = { git = "https://github.com/leanprover-community/mathlib4" }
+
+[[lean_exe]]
+name = "treysg"
+root = "Main"
