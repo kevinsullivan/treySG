@@ -4,8 +4,8 @@ import Mathlib.Data.Set.Basic
 -- 1. Atomic Propositions (`prop`). To be replaced.
 @@@ -/
 inductive prop
-  | hasStop | isStopped     -- Regular atomic propositions
-  | TrueProp     -- Special proposition representing "true"
+  | hasStop | isStopped     -- Atomic propositions
+  | TrueProp                -- True proposition
 deriving Repr, BEq
 
 /- @@@
@@ -55,17 +55,17 @@ def ltlToBuchi {prop : Type} [BEq prop] (trueProp : prop) (φ : LTL prop) : Buch
   let cl := closure trueProp φ  -- Compute closure (all subformulas)
   let states := { s | s ⊆ cl }  -- States are subsets of the closure
 
-  -- Define possible atomic propositions (Fix: Explicitly define `alphabet`)
+  -- Define possible atomic propositions
   let alphabet := { pSet : Set prop | ∀ p, p ∈ pSet → ∃ q, q = LTL.atom p ∧ q ∈ cl }
 
   -- Transition Relation
   let transitions := { triple |
-    ∃ s1 s2 pSet, s1 ⊆ cl ∧ s2 ⊆ cl ∧ pSet ∈ alphabet ∧ -- Ensure `pSet` is explicitly introduced
+    ∃ s1 s2 pSet, s1 ⊆ cl ∧ s2 ⊆ cl ∧ pSet ∈ alphabet ∧
     triple = (s1, pSet, s2) ∧
     (∀ q ∈ s1, match q with
       | LTL.next ψ => ψ ∈ s2  -- If X ψ is in s1, then ψ must be in s2
       | LTL.globally ψ => ψ ∈ s1 ∧ LTL.next (LTL.globally ψ) ∈ s2
-      | LTL.eventually ψ => ψ ∈ s2 ∨ LTL.until (LTL.atom trueProp) ψ ∈ s2  -- FIXED: Pass `trueProp`
+      | LTL.eventually ψ => ψ ∈ s2 ∨ LTL.until (LTL.atom trueProp) ψ ∈ s2
       | LTL.until ψ1 ψ2 => ψ2 ∈ s2 ∨ (ψ1 ∈ s1 ∧ q ∈ s2)
       | _ => True) }
 
@@ -81,11 +81,8 @@ def ltlToBuchi {prop : Type} [BEq prop] (trueProp : prop) (φ : LTL prop) : Buch
   { states := states, alphabet := alphabet, transitions := transitions, initial := initial, accepting := accepting }
 
 --------------------------------------------------
--- 6. Example: Convert an LTL Formula to a Büchi Automaton
+-- 6. Example: Convert Trey's LTL Formula to a Büchi Automaton
 --------------------------------------------------
-
--- Example LTL formula: G(p → F q) (Globally: if p holds, q must eventually hold)
-def myFormula : LTL prop := LTL.globally (LTL.implies (LTL.atom prop.p) (LTL.eventually (LTL.atom prop.q)))
 
 -- G((¬ 𝒉𝒂𝒔𝑺𝒕𝒐𝒑∧X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑)→(X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 U (𝒊𝒔𝑺𝒕𝒐𝒑𝒑𝒆𝒅∨G 𝒉𝒂𝒔𝑺𝒕𝒐𝒑))
 def treyFormula : LTL prop :=
