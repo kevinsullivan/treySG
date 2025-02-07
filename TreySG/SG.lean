@@ -2,6 +2,8 @@ import Mathlib.Data.Set.Basic
 
 namespace TreySG.SG
 
+-- Entity Types
+
 structure Lane : Type where
 (id : Nat)
 deriving Repr
@@ -13,27 +15,25 @@ deriving Repr
 structure StopSign : Type where
 (id : Nat)
 
-structure SceneGraph : Type 1 where
-
--- entities
+structure TreySceneGraph : Type 1 where
 (lanes : Set Lane)
 (egoVehicle : Vehicle)
 (otherVehicles : Set Vechicle)
-(egoInvariant : egoVehicle ∉ otherVehicles)
+(egoNotOther : egoVehicle ∉ otherVehicles)
 (vehicles : Set Vehicle := { egoVehicle} ∪ otherVehicles)
 (stopSigns : Set StopSign)
-
--- relations
 (ssControlsLane : StopSign → Lane → Bool)
 (vehInLane : Vehicle → Lane → Bool)
 
--- entities
-(lanesControledBySS : Set Lane := { l ∈ lanes |  ∀ ss ∈ stopSigns, ssControlsLane ss l })
-(vehicleLanes : Vehicle → Set Lane := λ v => { l ∈ lanes | ∀ veh ∈ vehicles, vehInLane veh l})
-(egoLanes : Set Lane := vehicleLanes egoVehicle)
-
 -- properties
+
+structure TreyFormulaProperties : Type _ where
+(sg : TreySceneGraph)
+(lanesControledBySS : Set Lane := { l ∈ sg.lanes |  ∀ ss ∈ sg.stopSigns, sg.ssControlsLane ss l })
+(vehicleLanes : Vehicle → Set Lane := λ v => { l ∈ sg.lanes | ∀ veh ∈ sg.vehicles, sg.vehInLane veh l})
+(egoLanes : Set Lane := vehicleLanes sg.egoVehicle)
 (vehHasStop (v : Vehicle) : Prop := ∃ l, l ∈ vehicleLanes v ∩ lanesControledBySS)
-(egoHasStop : Prop := vehHasStop egoVehicle)
+(egoHasStop : Prop := vehHasStop sg.egoVehicle)
+(properties : List Prop := [egoHasStop])
 
 end TreySG.SG
