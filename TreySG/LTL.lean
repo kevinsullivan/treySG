@@ -99,7 +99,7 @@ def treyFormula : LTL prop :=
       (LTL.next (LTL.atom prop.hasStop))
       (LTL.or
         (LTL.atom prop.isStopped)
-        ((LTL.atom prop.hasStop))
+        (LTL.globally (LTL.atom prop.hasStop))
       )
     )
   )
