@@ -4,7 +4,7 @@ import Mathlib.Data.Set.Basic
 -- 1. Atomic Propositions (`prop`). To be replaced.
 @@@ -/
 inductive prop
-  | p | q | r    -- Regular atomic propositions
+  | hasStop | isStopped     -- Regular atomic propositions
   | TrueProp     -- Special proposition representing "true"
 deriving Repr, BEq
 
@@ -87,8 +87,29 @@ def ltlToBuchi {prop : Type} [BEq prop] (trueProp : prop) (φ : LTL prop) : Buch
 -- Example LTL formula: G(p → F q) (Globally: if p holds, q must eventually hold)
 def myFormula : LTL prop := LTL.globally (LTL.implies (LTL.atom prop.p) (LTL.eventually (LTL.atom prop.q)))
 
+-- G((¬ 𝒉𝒂𝒔𝑺𝒕𝒐𝒑∧X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑)→(X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 U (𝒊𝒔𝑺𝒕𝒐𝒑𝒑𝒆𝒅∨G 𝒉𝒂𝒔𝑺𝒕𝒐𝒑))
+def treyFormula : LTL prop :=
+  LTL.globally
+  (
+    LTL.implies
+    (
+      LTL.and
+      (LTL.neg (LTL.atom prop.hasStop))
+      (LTL.next (LTL.atom prop.hasStop))
+    )
+    (
+      LTL.until
+      (LTL.next (LTL.atom prop.hasStop))
+      (LTL.or
+        (LTL.atom prop.isStopped)
+        ((LTL.atom prop.hasStop))
+      )
+    )
+  )
+
+
 -- Construct Büchi automaton for the given LTL formula
-def myBuchiAutomaton : BuchiAutomaton (Set (LTL prop)) prop := ltlToBuchi prop.TrueProp myFormula
+def treyBuchiAutomaton : BuchiAutomaton (Set (LTL prop)) prop := ltlToBuchi prop.TrueProp treyFormula
 
 -- Display result
-#reduce myBuchiAutomaton
+#reduce treyBuchiAutomaton
