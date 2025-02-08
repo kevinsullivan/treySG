@@ -29,10 +29,13 @@ structure TreySceneGraph : Type 1 where
 
 structure TreyFormulaProperties : Type _ where
 (sg : TreySceneGraph)
-(lanesControledBySS : Set Lane := { l ∈ sg.lanes |  ∀ ss ∈ sg.stopSigns, sg.ssControlsLane ss l })
-(vehicleLanes : Vehicle → Set Lane := λ v => { l ∈ sg.lanes | ∀ veh ∈ sg.vehicles, sg.vehInLane veh l})
+(lanesControledBySS : Set Lane :=
+  { l ∈ sg.lanes |  ∀ ss ∈ sg.stopSigns, sg.ssControlsLane ss l })
+(vehicleLanes : Vehicle → Set Lane :=
+  λ v => { l ∈ sg.lanes | ∀ veh ∈ sg.vehicles, sg.vehInLane veh l})
 (egoLanes : Set Lane := vehicleLanes sg.egoVehicle)
-(vehHasStop (v : Vehicle) : Prop := ∃ l, l ∈ vehicleLanes v ∩ lanesControledBySS)
+(vehHasStop (v : Vehicle) : Prop :=
+  ∃ l, l ∈ vehicleLanes v ∩ lanesControledBySS)
 (egoHasStop : Prop := vehHasStop sg.egoVehicle)
 (properties : List Prop := [egoHasStop])
 
