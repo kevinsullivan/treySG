@@ -22,11 +22,16 @@ inductive LTLf : Type
 | eventually (φ : LTLf)  -- F (Eventually, defined as U with true)
 | globally (φ : LTLf)  -- G (Globally, defined via !F!φ)
 
+open LTLf
+
 -- Previous constructor definitions with special characters:
--- | ◯ (φ : LTLf)  -- X (Next)
--- | U (φ ψ : LTLf)  -- U (Until)
--- | ◇ (φ : LTLf)  -- F (Eventually)
--- | □ (φ : LTLf)  -- G (Globally)
+--
+-- | Constructor | Symbol | Meaning |
+-- |------------|--------|---------|
+-- | ◯ (φ : LTLf) | X | Next |
+-- | U (φ ψ : LTLf) | U | Until |
+-- | ◇ (φ : LTLf) | F | Eventually |
+-- | □ (φ : LTLf) | G | Globally |
 
 -- Notation definitions
 notation:max "¬" φ => LTLf.neg φ
@@ -47,8 +52,8 @@ abbrev State := Set PropVar  -- A state is a set of true propositions
 abbrev Trace := List State  -- A trace is a finite sequence of states
 
 instance : DecidableEq PropVar := inferInstance
-instance {α} [DecidableEq α] : DecidableEq (Set α) := fun s t => by sorry -- exactI inferInstance
-instance {α} [DecidableEq α] : ∀ (s : Set α) (x : α), Decidable (x ∈ s) := fun s x => sorry -- Set.decidableMem s x
+instance {α} [DecidableEq α] : DecidableEq (Set α) := fun s t => by sorry
+instance {α} [DecidableEq α] : ∀ (s : Set α) (x : α), Decidable (x ∈ s) := fun s x => sorry
 
 -- Satisfaction relation for LTLf semantics over finite traces
 def satisfies : Trace → Nat → LTLf → Bool
@@ -66,13 +71,8 @@ def satisfies : Trace → Nat → LTLf → Bool
 
 -- Example formula
 def treyFormula : LTLf :=
-  □ (
-      (¬ {hasStop} ∧ ◯ {hasStop}) →
-      (◯ {hasStop} U ({isStopped} ∨ □ {hasStop}))
-    )
+  □ ((¬ {hasStop} ∧ ◯ {hasStop}) →
+  (◯ {hasStop} U ({isStopped} ∨ □ {hasStop})))
 
--- TODO: Improve this
--- Example trace check
--- Should return true
--- Provided some missing pieces are provided, provided, provided ...
-#reduce satisfies [{PropVar.hasStop}, {PropVar.isStopped}, {}] 0 treyFormula
+-- Example trace
+#reduce satisfies [{PropVar.hasStop}, {PropVar.isStopped}, {}] 0 (◇ {isStopped})  -- Should return true
