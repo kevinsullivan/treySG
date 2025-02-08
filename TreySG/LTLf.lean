@@ -47,8 +47,8 @@ abbrev State := Set PropVar  -- A state is a set of true propositions
 abbrev Trace := List State  -- A trace is a finite sequence of states
 
 instance : DecidableEq PropVar := inferInstance
-instance {α} [DecidableEq α] : DecidableEq (Set α) := fun s t => by exactI inferInstance
-instance {α} [DecidableEq α] : ∀ (s : Set α) (x : α), Decidable (x ∈ s) := fun s x => Set.decidableMem s x
+instance {α} [DecidableEq α] : DecidableEq (Set α) := fun s t => by sorry -- exactI inferInstance
+instance {α} [DecidableEq α] : ∀ (s : Set α) (x : α), Decidable (x ∈ s) := fun s x => sorry -- Set.decidableMem s x
 
 -- Satisfaction relation for LTLf semantics over finite traces
 def satisfies : Trace → Nat → LTLf → Bool
