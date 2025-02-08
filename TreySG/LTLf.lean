@@ -65,9 +65,14 @@ def satisfies : Trace → Nat → LTLf → Bool
 | σ, i, globally φ => let indices := List.range' i (σ.length - i); List.all indices (λ j => satisfies σ j φ)  -- Gφ ≡ ¬F¬φ
 
 -- Example formula
-def treyFormula : LTLf := □ ((¬ {hasStop} ∧ ◯ {hasStop}) → (◯ {hasStop} U ({isStopped} ∨ □ {hasStop})))
+def treyFormula : LTLf :=
+  □ (
+      (¬ {hasStop} ∧ ◯ {hasStop}) →
+      (◯ {hasStop} U ({isStopped} ∨ □ {hasStop}))
+    )
 
+-- TODO: Improve this
 -- Example trace check
 -- Should return true
 -- Provided some missing pieces are provided, provided, provided ...
-#reduce satisfies [{PropVar.hasStop}, {PropVar.isStopped}, {}] 0 (◇ {isStopped})
+#reduce satisfies [{PropVar.hasStop}, {PropVar.isStopped}, {}] 0 treyFormula
