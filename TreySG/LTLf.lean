@@ -67,7 +67,7 @@ def satisfies : Trace → Nat → LTLf → Bool
 -- Example formula
 def treyFormula : LTLf := □ ((¬ {hasStop} ∧ ◯ {hasStop}) → (◯ {hasStop} U ({isStopped} ∨ □ {hasStop})))
 
--- Example trace
+-- Example trace check
 -- Should return true
--- Provided some missing pieces are provided
+-- Provided some missing pieces are provided, provided, provided ...
 #reduce satisfies [{PropVar.hasStop}, {PropVar.isStopped}, {}] 0 (◇ {isStopped})
