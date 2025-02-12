@@ -1,4 +1,5 @@
-import Mathlib.Data.Set.Basic
+-- import Mathlib.Data.Set.Basic
+import Mathlib.Data.Finset.Basic
 
 open Std
 
@@ -48,12 +49,10 @@ notation "{isStopped}" => LTLf.atom PropVar.isStopped
 open LTLf
 
 -- Finite trace model: A trace is a list of state valuations
-abbrev State := Set PropVar  -- A state is a set of true propositions
+abbrev State := Finset PropVar  -- A state is a set of true propositions
 abbrev Trace := List State  -- A trace is a finite sequence of states
 
-instance : DecidableEq PropVar := inferInstance
-instance {α} [DecidableEq α] : DecidableEq (Set α) := fun s t => by sorry
-instance {α} [DecidableEq α] : ∀ (s : Set α) (x : α), Decidable (x ∈ s) := fun s x => sorry
+instance [DecidableEq PropVar] : ∀ (s : Finset PropVar) (x : PropVar), Decidable (x ∈ s) := fun s x => s.decidableMem x
 
 -- Satisfaction relation for LTLf semantics over finite traces
 def satisfies : Trace → Nat → LTLf → Bool
@@ -69,10 +68,19 @@ def satisfies : Trace → Nat → LTLf → Bool
 | σ, i, eventually φ => let indices := List.range' i (σ.length - i); List.any indices (λ j => satisfies σ j φ)  -- Fφ ≡ true U φ
 | σ, i, globally φ => let indices := List.range' i (σ.length - i); List.all indices (λ j => satisfies σ j φ)  -- Gφ ≡ ¬F¬φ
 
+-- Check if the trace is satisfying starting at the beginning and running the full trace
+def satisfyingTrace (σ : Trace) (ℓ : LTLf) : Bool := satisfies σ 0 ℓ
+
 -- Example formula
-def treyFormula : LTLf :=
-  □ ((¬ {hasStop} ∧ ◯ {hasStop}) →
-  (◯ {hasStop} U ({isStopped} ∨ □ {hasStop})))
+def stopAtStopSigns : LTLf :=
+  -- G((¬ 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 ∧ X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑)→(X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 U (𝒊𝒔𝑺𝒕𝒐𝒑𝒑𝒆𝒅 ∨ G 𝒉𝒂𝒔𝑺𝒕𝒐𝒑))
+  □ (((¬ {hasStop}) ∧ (◯ {hasStop})) →
+  ((◯ {hasStop}) U ({isStopped} ∨ (□ {hasStop}))))
+
+def eventuallyIsStopped : LTLf := (◇ {isStopped})
 
 -- Example trace
-#reduce satisfies [{PropVar.hasStop}, {PropVar.isStopped}, {}] 0 (◇ {isStopped})  -- Should return true
+#reduce satisfyingTrace [{PropVar.hasStop}, {PropVar.isStopped}, {}] eventuallyIsStopped  -- Should return true
+#reduce satisfyingTrace [{PropVar.hasStop}, {PropVar.isStopped}, {}] stopAtStopSigns  -- Should return true
+-- this is the minimal non-accepting trace, no stop sign, then stop sign, then no stop sign, without stopping
+#reduce satisfyingTrace [{}, {PropVar.hasStop}, {}] stopAtStopSigns  -- Should return false
