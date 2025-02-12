@@ -85,6 +85,8 @@ def eventuallyIsStopped : LTLf := (◇ {isStopped})
 -- this is the minimal non-accepting trace, no stop sign, then stop sign, then no stop sign, without stopping
 #reduce satisfyingTrace [{}, {PropVar.hasStop}, {}] stopAtStopSigns  -- Should return false
 
+
+-- Interface to extract state data from SceneGraphs
 def extractFrame (sg : TreySG.SG.SceneGraph) : State := (if sg.hasStop then {PropVar.hasStop} else {}) ∪ (if sg.isStopped then {PropVar.isStopped} else {})
 
 abbrev SGTrace := List TreySG.SG.SceneGraph

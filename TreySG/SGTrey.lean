@@ -107,8 +107,10 @@ structure SceneGraph : Type 1 where
 (allOfType (type : EntityType) := {n ∈ nodes | kind n == type})
 
 -- Properties
-(hasStop: Prop := ((relSet {ego} IsIn) ∩ (relSet (allOfType StopSign) Controls)) ≠ ∅)
+-- These should probably be Prop, but doing that made LTLf.lean sad bc it said it wasn't decidable
+-- I don't follow how it's decidable here, but it isn't decidable within LTLf.lean
+(hasStop: Bool := ((relSet {ego} IsIn) ∩ (relSet (allOfType StopSign) Controls)) ≠ ∅)
 -- for some reason inlining the lambda from attrIsZero didn't work here, so it's defined separately
-(isStopped : Prop := (filterByAttribute {ego} Speed attrIsZero) ≠ ∅)
+(isStopped : Bool := (filterByAttribute {ego} Speed attrIsZero) ≠ ∅)
 
 end TreySG.SG
