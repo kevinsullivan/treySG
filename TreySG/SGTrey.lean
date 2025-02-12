@@ -1,11 +1,11 @@
-import Mathlib.Data.Set.Basic
-import Mathlib.Data.Set.Basic
+-- import Mathlib.Data.Set.Basic
+import Mathlib.Data.Finset.Basic
 
 namespace TreySG.SG
 
 structure Node : Type where
 (id : Nat)
-deriving Repr
+deriving Repr, BEq, DecidableEq, Hashable
 
 inductive SemanticRelation
 -- containment, e.g. entities in Lanes, Lanes in Roads, Roads in Intersections
@@ -31,7 +31,7 @@ inductive SemanticRelation
 | VeryNear
 | Near
 | Visible
-deriving Repr
+deriving Repr, BEq, DecidableEq
 
 inductive EntityType
 -- Road structures
@@ -48,29 +48,31 @@ inductive EntityType
 | Bus
 | Motorcycle
 | Bicycle
-deriving Repr
+deriving Repr, BEq, DecidableEq
 
 inductive ColorType
 | Green
 | Yellow
 | Red
-deriving Repr
+deriving Repr, BEq, DecidableEq
 
 inductive AttributeType
 | Speed
 | Color
-deriving Repr
+deriving Repr, BEq, DecidableEq
 
 -- def AttributeValueType := (Sum Nat ColorType)
 inductive AttributeValueType
 | num (n : Nat)
 | color (c : ColorType)
-deriving Repr
+deriving Repr, BEq, DecidableEq
 
 open SemanticRelation
 open EntityType
 open ColorType
 open AttributeType
+
+abbrev NodeSet := Finset Node
 
 def attrIsZero : AttributeValueType → Bool :=
   λ x => match x with
@@ -81,9 +83,10 @@ structure SceneGraph : Type 1 where
 
 -- entities
 (ego : Node)
-(others : Set Node)
+(egoSet : NodeSet := {ego})
+(others : NodeSet)
 (egoInvariant : ego ∉ others)
-(nodes : Set Node := { ego } ∪ others)
+(nodes : NodeSet := egoSet ∪ others)
 
 -- node types
 (kind: Node → EntityType)
@@ -95,13 +98,13 @@ structure SceneGraph : Type 1 where
 (hasRel : Node → Node → SemanticRelation → Bool)
 
 -- Graph Query Functions
-(relSet (relSetNodes : Set Node) (relation : SemanticRelation) : Set Node :=
+(relSet (relSetNodes : NodeSet) (relation : SemanticRelation) : NodeSet :=
  { o ∈ nodes | ∃ n ∈ relSetNodes, hasRel n o relation})
 
-(filterByAttribute (filterNodes : Set Node) (attrType : AttributeType) (filterFn : AttributeValueType → Bool) : Set Node :=
+(filterByAttribute (filterNodes : NodeSet) (attrType : AttributeType) (filterFn : AttributeValueType → Bool) : NodeSet :=
  { o ∈ filterNodes | filterFn (attr o attrType)})
 
-(allOfType (type : EntityType) := {n ∈ nodes | kind n = type})
+(allOfType (type : EntityType) := {n ∈ nodes | kind n == type})
 
 -- Properties
 (hasStop: Prop := ((relSet {ego} IsIn) ∩ (relSet (allOfType StopSign) Controls)) ≠ ∅)

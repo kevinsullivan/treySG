@@ -1,5 +1,5 @@
--- import Mathlib.Data.Set.Basic
 import Mathlib.Data.Finset.Basic
+import TreySG.SGTrey
 
 open Std
 
@@ -84,3 +84,10 @@ def eventuallyIsStopped : LTLf := (◇ {isStopped})
 #reduce satisfyingTrace [{PropVar.hasStop}, {PropVar.isStopped}, {}] stopAtStopSigns  -- Should return true
 -- this is the minimal non-accepting trace, no stop sign, then stop sign, then no stop sign, without stopping
 #reduce satisfyingTrace [{}, {PropVar.hasStop}, {}] stopAtStopSigns  -- Should return false
+
+def extractFrame (sg : TreySG.SG.SceneGraph) : State := (if sg.hasStop then {PropVar.hasStop} else {}) ∪ (if sg.isStopped then {PropVar.isStopped} else {})
+
+abbrev SGTrace := List TreySG.SG.SceneGraph
+def extractTrace (sgs : SGTrace) : Trace := sgs.map extractFrame
+
+def satisfyingSGTrace (sgs : SGTrace) (ℓ : LTLf) : Bool := satisfyingTrace (extractTrace sgs) ℓ
