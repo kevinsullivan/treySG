@@ -71,13 +71,16 @@ def satisfies : Trace → Nat → LTLf → Bool
 -- Check if the trace is satisfying starting at the beginning and running the full trace
 def satisfyingTrace (σ : Trace) (ℓ : LTLf) : Bool := satisfies σ 0 ℓ
 
--- Example formula
-def stopAtStopSigns : LTLf :=
-  -- G((¬ 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 ∧ X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑)→(X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 U (𝒊𝒔𝑺𝒕𝒐𝒑𝒑𝒆𝒅 ∨ G 𝒉𝒂𝒔𝑺𝒕𝒐𝒑))
-  □ (((¬ {hasStop}) ∧ (◯ {hasStop})) →
-  ((◯ {hasStop}) U ({isStopped} ∨ (□ {hasStop}))))
 
-def eventuallyIsStopped : LTLf := (◇ {isStopped})
+------------------
+-- TREY SG EXAMPLE
+------------------
+def stopAtStopSigns : LTLf :=
+-- Trey's Example: G((¬ 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 ∧ X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑) → (X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 U (𝒊𝒔𝑺𝒕𝒐𝒑𝒑𝒆𝒅 ∨ G 𝒉𝒂𝒔𝑺𝒕𝒐𝒑))
+  □((¬{hasStop}) ∧ (◯{hasStop})) → (◯{hasStop}) U ({isStopped} ∨ (□{hasStop}))
+  -- TODO: Add a nice natural (English) language rendition, for human learners
+
+def eventuallyIsStopped : LTLf := (◇{isStopped})
 
 -- Example trace
 #reduce satisfyingTrace [{PropVar.hasStop}, {PropVar.isStopped}, {}] eventuallyIsStopped  -- Should return true
