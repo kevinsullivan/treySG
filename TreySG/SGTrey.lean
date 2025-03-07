@@ -4,7 +4,7 @@ import Mathlib.Data.Finset.Basic
 namespace TreySG.SG
 
 structure Node : Type where
-(id : Nat)
+(id : String)
 deriving Repr, BEq, DecidableEq, Hashable
 
 inductive SemanticRelation
@@ -31,6 +31,9 @@ inductive SemanticRelation
 | VeryNear
 | Near
 | Visible
+-- Catchall
+| None
+| Unknown
 deriving Repr, BEq, DecidableEq
 
 inductive EntityType
@@ -48,6 +51,9 @@ inductive EntityType
 | Bus
 | Motorcycle
 | Bicycle
+-- Catchall
+| Unknown
+| Bot
 deriving Repr, BEq, DecidableEq
 
 inductive ColorType
@@ -65,6 +71,7 @@ deriving Repr, BEq, DecidableEq
 inductive AttributeValueType
 | num (n : Nat)
 | color (c : ColorType)
+| None
 deriving Repr, BEq, DecidableEq
 
 open SemanticRelation
@@ -78,39 +85,36 @@ def attrIsZero : AttributeValueType → Bool :=
   λ x => match x with
     | AttributeValueType.num n => n == 0
     | AttributeValueType.color _ => false
+    | AttributeValueType.None => false
 
 structure SceneGraph : Type 1 where
-
 -- entities
 (ego : Node)
-(egoSet : NodeSet := {ego})
 (others : NodeSet)
-(egoInvariant : ego ∉ others)
-(nodes : NodeSet := egoSet ∪ others)
-
 -- node types
 (kind: Node → EntityType)
-
 -- attributes
 (attr: Node → AttributeType → AttributeValueType)
-
 -- relations
 (hasRel : Node → Node → SemanticRelation → Bool)
 
+
+def sg_nodes (sg : SceneGraph) : NodeSet := {sg.ego} ∪ sg.others
+
 -- Graph Query Functions
-(relSet (relSetNodes : NodeSet) (relation : SemanticRelation) : NodeSet :=
- { o ∈ nodes | ∃ n ∈ relSetNodes, hasRel n o relation})
+def relSet (sg : SceneGraph) (relSetNodes : NodeSet) (relation : SemanticRelation) : NodeSet :=
+ { o ∈ sg_nodes sg | ∃ n ∈ relSetNodes, sg.hasRel n o relation}
 
-(filterByAttribute (filterNodes : NodeSet) (attrType : AttributeType) (filterFn : AttributeValueType → Bool) : NodeSet :=
- { o ∈ filterNodes | filterFn (attr o attrType)})
+def filterByAttribute (sg : SceneGraph) (filterNodes : NodeSet) (attrType : AttributeType) (filterFn : AttributeValueType → Bool) : NodeSet :=
+ { o ∈ filterNodes | filterFn (sg.attr o attrType)}
 
-(allOfType (type : EntityType) := {n ∈ nodes | kind n == type})
+def allOfType (sg : SceneGraph) (type : EntityType) := {n ∈ sg_nodes sg | sg.kind n == type}
 
 -- Properties
 -- These should probably be Prop, but doing that made LTLf.lean sad bc it said it wasn't decidable
 -- I don't follow how it's decidable here, but it isn't decidable within LTLf.lean
-(hasStop: Bool := ((relSet {ego} IsIn) ∩ (relSet (allOfType StopSign) Controls)) ≠ ∅)
+def hasStop (sg : SceneGraph) : Bool := ((relSet sg {sg.ego} IsIn) ∩ (relSet sg (allOfType sg StopSign) Controls)) ≠ ∅
 -- for some reason inlining the lambda from attrIsZero didn't work here, so it's defined separately
-(isStopped : Bool := (filterByAttribute {ego} Speed attrIsZero) ≠ ∅)
+def isStopped (sg : SceneGraph) : Bool := (filterByAttribute sg {sg.ego} Speed attrIsZero) ≠ ∅
 
 end TreySG.SG

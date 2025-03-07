@@ -87,7 +87,7 @@ def eventuallyIsStopped : LTLf := (◇ {isStopped})
 
 
 -- Interface to extract state data from SceneGraphs
-def extractFrame (sg : TreySG.SG.SceneGraph) : State := (if sg.hasStop then {PropVar.hasStop} else {}) ∪ (if sg.isStopped then {PropVar.isStopped} else {})
+def extractFrame (sg : TreySG.SG.SceneGraph) : State := (if TreySG.SG.hasStop sg then {PropVar.hasStop} else {}) ∪ (if TreySG.SG.isStopped sg then {PropVar.isStopped} else {})
 
 abbrev SGTrace := List TreySG.SG.SceneGraph
 def extractTrace (sgs : SGTrace) : Trace := sgs.map extractFrame
