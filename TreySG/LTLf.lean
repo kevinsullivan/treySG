@@ -78,7 +78,13 @@ def satisfyingTrace (σ : Trace) (ℓ : LTLf) : Bool := satisfies σ 0 ℓ
 def stopAtStopSigns : LTLf :=
 -- Trey's Example: G((¬ 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 ∧ X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑) → (X 𝒉𝒂𝒔𝑺𝒕𝒐𝒑 U (𝒊𝒔𝑺𝒕𝒐𝒑𝒑𝒆𝒅 ∨ G 𝒉𝒂𝒔𝑺𝒕𝒐𝒑))
   □((¬{hasStop}) ∧ (◯{hasStop})) → (◯{hasStop}) U ({isStopped} ∨ (□{hasStop}))
-  -- TODO: Add a nice natural (English) language rendition, for human learners
+  -- It must always be the case that (the outer □):
+  -- whenever you encounter a new stop sign (you transition from not having a stop sign to next having a stop sign: (¬{hasStop}) ∧ (◯{hasStop}))
+  -- then (→) starting from the time you have the stop sign (◯), you must continue to have the stop sign until you are stopped ((◯{hasStop}) U ({isStopped} ∨ ...)
+  --          OR, you must have that stop sign for the rest of time (∨ (□{hasStop}))
+  -- NB: the usage of hasStop until isStopped might better be understood as "isStopped must become true before hasStopped becomes false",
+  -- i.e. you must stop (isStopped) before passing the stop sign (¬hasStop)
+  -- NB: the final □{hasStop} is required so that it is not a violation if the trace ends while you are still stopped at the stop sign.
 
 def eventuallyIsStopped : LTLf := (◇{isStopped})
 
